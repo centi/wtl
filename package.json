@@ -1,0 +1,23 @@
+{
+  "name": "wtl",
+  "version": "0.0.1",
+  "description": "What The Language online service",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/centi/wtl.git"
+  },
+  "author": "Ivan Čentéš",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/centi/wtl/issues"
+  },
+  "homepage": "https://github.com/centi/wtl#readme",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.3",
+    "jsonfile": "^2.2.3",
+    "lang-detector": "^1.0.6",
+    "morgan": "^1.6.1",
+    "nunjucks": "^2.3.0"
+  }
+}
