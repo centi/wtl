@@ -3,34 +3,55 @@
 var express     = require('express');
 var path        = require('path');
 var logger      = require('morgan');
-var bodyParser  = require('body-parser');
-var nunjucks    = require('nunjucks');
+var detectLang  = require('lang-detector');
 var router      = express.Router();
-var Server      = require('./app/server')
-var routeIndex  = require('./app/routes/index');
-var routeErrors = require('./app/routes/errors');
-
-router.get('/*', routeIndex.get);
-router.post('/*', routeIndex.post);
+var Server      = require('./server')
 
 var app = express();
-//app.use(express.static(path.join(__dirname, '../frontend')));
 app.use(logger('dev'));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/', router);
-app.use(routeErrors.get404);
-app.use(routeErrors.get500);
 
-nunjucks.configure(path.join(__dirname, './templates'), {
-    autoescape: true,
-    express: app
+// collect raw body data
+app.use(function(req, res, next) {
+    var data = '';
+    req.setEncoding('utf8');
+    req.on('data', function(chunk) {
+        data += chunk;
+    });
+    req.on('end', function() {
+        req.rawBody = data;
+        next();
+    });
 });
-app.set('view engine', 'html');
-app.locals.devel = app.get('env') === 'development';
 
+// routes
+router.get('/*', function(req, res, next) {
+    res.send('Use POST.');
+});
+router.post('/*', function(req, res, next) {
+    res.set('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+        result : {
+            detected : detectLang(req.rawBody || '', {statistics:true})
+        }
+    }));
+});
+app.use('/', router);
+app.use(function(req, res, next) {
+    res.set('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+        error  : '404 Not Found'
+    }));
+});
+app.use(function(err, req, res, next) {
+    res.set('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+        error  : err.status || 500 + ' ' + err.message
+    }));
+});
+
+// server
 var server = new Server(app, {
         "port"   : 3000
     }
 );
-
 server.start();
