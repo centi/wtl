@@ -4,8 +4,10 @@ var express     = require('express');
 var path        = require('path');
 var logger      = require('morgan');
 var detectLang  = require('lang-detector');
+var jsonfile    = require('jsonfile');
 var router      = express.Router();
-var Server      = require('./server')
+var Server      = require('./server');
+var config      = jsonfile.readFileSync(path.join(__dirname, './config.json'));
 
 var app = express();
 app.use(logger('dev'));
@@ -50,8 +52,5 @@ app.use(function(err, req, res, next) {
 });
 
 // server
-var server = new Server(app, {
-        "port"   : 3000
-    }
-);
+var server = new Server(app, config.server);
 server.start();
